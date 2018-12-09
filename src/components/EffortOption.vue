@@ -5,7 +5,7 @@
         left: left * 100 / 55 + '%',
         top: top * 100 / 34 + '%',
         backgroundColor: 'rgb(0, ' + (200 - order * 10) + ', ' + 160 + order * 10 + ')',
-        fontSize: value * 0.618 + 'vw' // order * 100 + '%'
+        fontSize: value * 0.618 + 'vmin' // order * 100 + '%'
     }">
         <span>{{ value }}</span>
     </div>

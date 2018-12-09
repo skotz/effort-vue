@@ -132,6 +132,16 @@
         width: 61.818vw;
         height: calc(61.818vw * 34 / (34 + 21))
     }
+    @media (min-width: 800px) {
+        .effort {
+            margin: 30px auto;
+            background-color: #EEE;
+            position: relative;
+            width: 618px;
+            height: calc(618px * 34 / (34 + 21))
+        }
+    }
+
     .username {
         display: inline-block;
     }
