@@ -34,7 +34,7 @@
             <div class="col-6">
                 <div class="row">
                     <div class="col-12 votes">
-                        <div v-for="(item, key, index) in projectEfforts" :key="item.userid">
+                        <div v-for="item in projectEfforts" :key="item.userid">
                             <span class="username">{{ item.username }}</span>
                             <span class="vote">{{ item.effort }}</span>
                         </div>
