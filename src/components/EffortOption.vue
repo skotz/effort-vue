@@ -1,6 +1,13 @@
 <template>
-    <div class="effort-option" v-on:click="vote(value)" :style="{ width: value * 20 + 'px', height: value * 20 + 'px'}">
-        {{ value }}
+    <div class="effort-option" v-on:click="vote(value, parent)" :style="{ 
+        width: value * 100 / 55 + '%',
+        height: value * 100 / 34 + '%',
+        left: left * 100 / 55 + '%',
+        top: top * 100 / 34 + '%',
+        backgroundColor: 'rgb(0, ' + (200 - order * 10) + ', ' + 160 + order * 10 + ')',
+        fontSize: value * 0.618 + 'vw' // order * 100 + '%'
+    }">
+        <span>{{ value }}</span>
     </div>
 </template>
 
@@ -8,7 +15,11 @@
     export default {
         name: 'EffortOption',
         props: {
-            value: Number
+            value: Number,
+            left: Number,
+            top: Number,
+            order: Number,
+            parent: {}
         },
         inject: ['vote']
     }
@@ -17,8 +28,17 @@
 <style scoped>
     .effort-option {
         display: inline-block;
-        background-color: #F00;
-        border: 1px solid #A00;
-        line-height: 50px;
+        position: absolute;
+        border: 1px solid #FFF;
+        text-align: center;
+        color: #FFFFFF;
+    }
+    .effort-option:hover {
+        cursor: pointer;
+        background-color: #0033DD !important;
+    }
+    .effort-option > span {
+        display: inline-block;
+        vertical-align: middle;
     }
 </style>
