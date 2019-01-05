@@ -132,11 +132,31 @@
     // Maximum fibonacci number allowed
     var maxOption = 13;
 
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+
     // Get saved settings
-    var userid = sessionStorage.getItem('userid');
+    var userid = getCookie('userid');
     if (userid == null) {
         userid = Math.floor(Math.random() * 100000000);
-        sessionStorage.setItem('userid', userid);
+        setCookie('userid', userid);
     }
 
     // Convert the linear value of the option to it's fibonacci number
@@ -179,8 +199,8 @@
         },
         data: function () {
             return {
-                project: sessionStorage.getItem('project'),
-                username: sessionStorage.getItem('username'),
+                project: getCookie('project'),
+                username: getCookie('username'),
                 efforts: {}
             }
         },
@@ -195,7 +215,7 @@
             }
             if (projectid != null) {
                 this.project = projectid;
-                sessionStorage.setItem('project', projectid);
+                setCookie('project', projectid);
             }
             if (projectid == null || this.username == null) {
                 this.$router.push('/');
@@ -307,8 +327,8 @@
                 return all;
             },
             saveData: function () {
-                sessionStorage.setItem('project', this.project);
-                sessionStorage.setItem('username', this.username);
+                setCookie('project', this.project);
+                setCookie('username', this.username);
             },
             vote: function (effort) {
                 database.ref('effort/' + this.project + "/" + userid).set({

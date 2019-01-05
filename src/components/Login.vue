@@ -28,10 +28,30 @@
 
 <script>
     // Get saved settings
-    var userid = sessionStorage.getItem('userid');
+    var userid = getCookie('userid');
     if (userid == null) {
         userid = Math.floor(Math.random() * 100000000);
-        sessionStorage.setItem('userid', userid);
+        setCookie('userid', userid);
+    }
+
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
     }
 
     // Vue
@@ -39,14 +59,14 @@
         name: 'Login',
         data: function () {
             return {
-                project: sessionStorage.getItem('project'),
-                username: sessionStorage.getItem('username')
+                project: getCookie('project'),
+                username: getCookie('username')
             }
         },
         methods: {
             saveData: function () {
-                sessionStorage.setItem('project', this.project);
-                sessionStorage.setItem('username', this.username);
+                setCookie('project', this.project);
+                setCookie('username', this.username);
                 this.$router.push('/project');
             }
         }
