@@ -125,6 +125,10 @@
 </script>
 
 <style scoped>
+    .effort-container {
+        
+    }
+
     .effort {
         margin: 30px auto;
         background-color: #EEE;
