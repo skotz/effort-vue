@@ -21,7 +21,7 @@
                     <div class="effort-axis">
                         13
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==13" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(13)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -32,7 +32,7 @@
                     <div class="effort-axis">
                         8
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==8" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(8)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -43,7 +43,7 @@
                     <div class="effort-axis">
                         5
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==5" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(5)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -54,7 +54,7 @@
                     <div class="effort-axis">
                         3
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==3" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(3)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -65,7 +65,7 @@
                     <div class="effort-axis">
                         2
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==2" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(2)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -76,7 +76,7 @@
                     <div class="effort-axis">
                         1
                     </div>
-                    <div v-for="item in projectEfforts" v-if="item.effort==1" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(1)" :key="item.userid" class="effort-user">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -128,9 +128,6 @@
 
     var resetVote = -1;
     var nullVote = -2;
-
-    // Number of options for voting
-    var numberOfOptions = 6;
 
     // Maximum fibonacci number allowed
     var maxOption = 13;
@@ -193,7 +190,9 @@
                 if (this.$route.query.p.length) {
                     projectid = this.$route.query.p;
                 }
-            } catch { }
+            } catch {
+                projectid = this.project;
+            }
             if (projectid != null) {
                 this.project = projectid;
                 sessionStorage.setItem('project', projectid);
@@ -209,21 +208,6 @@
             }
         },
         computed: {
-            projectEfforts: function () {
-                var all = [];
-                for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort != null) {
-                        all.push({ 
-                            userid: i,
-                            username: this.efforts[i].username, 
-                            effort: this.efforts[i].effort,
-                            timestamp: this.efforts[i].timestamp != null ? parseInt(this.efforts[i].timestamp, 10) : 0
-                        });
-                    }
-                }
-                all.sort(function (c, n) { return c.timestamp - n.timestamp });
-                return all;
-            },
             allUsers: function () {
                 var all = [];
                 for (var i in this.efforts) {
@@ -307,6 +291,21 @@
             }
         },
         methods: {
+            projectEfforts: function (effort) {
+                var all = [];
+                for (var i in this.efforts) {
+                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort == effort) {
+                        all.push({ 
+                            userid: i,
+                            username: this.efforts[i].username, 
+                            effort: this.efforts[i].effort,
+                            timestamp: this.efforts[i].timestamp != null ? parseInt(this.efforts[i].timestamp, 10) : 0
+                        });
+                    }
+                }
+                all.sort(function (c, n) { return c.timestamp - n.timestamp });
+                return all;
+            },
             saveData: function () {
                 sessionStorage.setItem('project', this.project);
                 sessionStorage.setItem('username', this.username);
