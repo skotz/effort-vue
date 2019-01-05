@@ -1,18 +1,18 @@
 <template>
   <div class="home">
     <Header/>
-    <Login/>
+    <Poker/>
   </div>
 </template>
 
 <script>
-import Login from '@/components/Login.vue'
+import Poker from '@/components/Poker.vue'
 import Header from '@/components/Header.vue'
 
 export default {
   name: 'home',
   components: {
-    Login,
+    Poker,
     Header
   }
 }
