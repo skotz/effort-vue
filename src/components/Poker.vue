@@ -1,10 +1,11 @@
 <template>
     <div class="container">
-        <div>
-            <div class="row">
-                <div class="col-12">
-                    <p>Hello <b>{{ username }}</b>, you've joined the <b>{{ project }}</b> project. <router-link to="/">Leave</router-link></p>
-                </div>
+        <div class="row">
+            <div class="col-8">
+                <p>Hello <b>{{ username }}</b>, you've joined the <b>{{ project }}</b> project. <router-link to="/">Leave</router-link></p>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-primary float-right" v-on:click="resetVotes">Reset Votes</button>
             </div>
         </div>
         <div class="effort-container">
@@ -13,7 +14,7 @@
                     <div class="effort-axis-spacer"></div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="13" v-on:click="vote(13)">
+            <div v-bind:class="['row', 'effort-row', myVote == 13 ? 'my-vote' : '']" data-effort-row="13" v-on:click="vote(13)">
                 <div class="col-12">
                     <div class="effort-axis">
                         13
@@ -24,7 +25,7 @@
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="8" v-on:click="vote(8)">
+            <div v-bind:class="['row', 'effort-row', myVote == 8 ? 'my-vote' : '']" data-effort-row="8" v-on:click="vote(8)">
                 <div class="col-12">
                     <div class="effort-axis">
                         8
@@ -35,7 +36,7 @@
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="5" v-on:click="vote(5)">
+            <div v-bind:class="['row', 'effort-row', myVote == 5 ? 'my-vote' : '']" data-effort-row="5" v-on:click="vote(5)">
                 <div class="col-12">
                     <div class="effort-axis">
                         5
@@ -46,7 +47,7 @@
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="3" v-on:click="vote(3)">
+            <div v-bind:class="['row', 'effort-row', myVote == 3 ? 'my-vote' : '']" data-effort-row="3" v-on:click="vote(3)">
                 <div class="col-12">
                     <div class="effort-axis">
                         3
@@ -57,7 +58,7 @@
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="2" v-on:click="vote(2)">
+            <div v-bind:class="['row', 'effort-row', myVote == 2 ? 'my-vote' : '']" data-effort-row="2" v-on:click="vote(2)">
                 <div class="col-12">
                     <div class="effort-axis">
                         2
@@ -68,7 +69,7 @@
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
             </div>
-            <div class="row effort-row" data-effort-row="1" v-on:click="vote(1)">
+            <div v-bind:class="['row', 'effort-row', myVote == 1 ? 'my-vote' : '']" data-effort-row="1" v-on:click="vote(1)">
                 <div class="col-12">
                     <div class="effort-axis">
                         1
@@ -82,6 +83,7 @@
             <div class="row effort-row effort-row-small">
                 <div class="col-12">
                     <div class="effort-axis-spacer"></div>
+                    <div class="effort-votes-axis-corner"></div>
                 </div>
             </div>
             <div class="row effort-votes-row">
@@ -100,6 +102,9 @@
                     <div class="effort-votes-axis-padding">&nbsp;</div>
                 </div>
             </div>
+        </div>
+        <div>
+            <p class="user-list">Users: <span v-for="item in allUsers" :key="item.userid"><b>{{ item.username }}</b>{{ item.last ? "" : (item.secondToLast ? ", and " : ", ") }} </span></p>
         </div>
     </div>
 </template>
@@ -169,6 +174,37 @@
                 }
                 all.sort(function (c, n) { return c.timestamp - n.timestamp });
                 return all;
+            },
+            allUsers: function () {
+                var all = [];
+                for (var i in this.efforts) {
+                    if (this.efforts[i] != null && this.efforts[i].username != null) {
+                        all.push({ 
+                            userid: i,
+                            username: this.efforts[i].username,
+                            effort: this.efforts[i].effort,
+                            voted: this.efforts[i].effort > 0,
+                            last: false,
+                            secondToLast: false
+                        });
+                    }
+                }
+                if (all.length > 0) {
+                    all[all.length - 1].last = true;
+                }
+                if (all.length > 1) {
+                    all[all.length - 2].secondToLast = true;
+                }
+                return all;
+            },
+            myVote: function() {
+                var users = this.allUsers;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].userid == userid) {
+                        return users[i].effort;
+                    }
+                }
+                return -1;
             }
         },
         created: function () {
@@ -190,6 +226,17 @@
                     effort: effort,
                     timestamp: Math.round((new Date()).getTime() / 1000)
                 });
+            },
+            resetVotes: function () {
+                var users = this.allUsers;
+                var resetVote = -1;
+                for (var i = 0; i < users.length; i++) {
+                    database.ref('effort/' + this.project + "/" + users[i].userid).set({
+                        username: users[i].username,
+                        effort: resetVote,
+                        timestamp: Math.round((new Date()).getTime() / 1000)
+                    });
+                }
             }
         }
     }
@@ -204,17 +251,18 @@
         padding: 0 15px 0 0;
         margin: 0 15px 0 0;
         align-items: center;
-        border-right: 1px solid #0000AA;
+        border-right: 2px solid #0000AA;
         height: 65px;
         width: 50px;
         justify-content: flex-end;
         font-size: 1.5em;
+        white-space: nowrap;
     }
     .effort-axis:after {
         content: "";
         position: absolute;
         width: 10px;
-        border-bottom: 1px solid #0000AA;
+        border-bottom: 2px solid #0000AA;
         left: 55px;
     }
     .effort-row-small {
@@ -226,11 +274,16 @@
         margin: 0 15px 0 0;
         height: 7px;
         width: 50px;
-        border-right: 1px solid #0000AA;
+        border-right: 2px solid #0000AA;
     }
     .effort-votes-axis-spacer {
         display: inline-flex;
-        width: 49px;
+        width: 48px;
+    }
+    .effort-votes-axis-corner {
+        display: inline-flex;
+        border-right: 2px solid #0000AA;
+        width: 2px;
     }
     .effort-votes-axis,
     .effort-votes-axis-padding {
@@ -238,7 +291,7 @@
         padding: 0px;
         margin: 0px;
         align-items: center;
-        border-top: 1px solid #0000AA;
+        border-top: 2px solid #0000AA;
         height: 50px;
         width: 65px;
         justify-content: center;
@@ -261,7 +314,8 @@
         margin: 0 15px 0 0;
         height: 50px;
         width: 50px;
-        border: 1px solid #000000;
+        border: 1px solid #BBBBBB;
+        background: linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.01) 100%);
         align-items: center;
         white-space: nowrap;
         overflow: hidden;
@@ -269,8 +323,14 @@
     .effort-user-insert {
         display: none;
         border: 1px dashed #AAAAAA;
+        background: none;
     }
-    .effort-row:hover .effort-user-insert {
+    .effort-row:hover:not(.my-vote) .effort-user-insert {
         display: inline-flex;
+    }
+    .user-list {
+    }
+    .my-vote-tile {
+        background: red;
     }
 </style>
