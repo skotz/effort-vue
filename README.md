@@ -1,7 +1,9 @@
 # Effort VUE
 Team estimation tool using Firebase Realtime Database and Vue.
 
-[Play](https://skotz.github.io/effort-vue/#/)
+[Play Online](https://skotz.github.io/effort-vue/#/)
+
+![Screenshot](img/ui.png)
 
 ## Project setup
 ```
