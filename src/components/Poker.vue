@@ -9,6 +9,8 @@
             </div>
         </div>
         <div class="effort-container">
+            <div class="line-average" v-bind:style="{ top: averageVoteHeight + 'px' }"></div>
+            <div class="line-average-label" v-bind:style="{ top: (averageVoteHeight - 20) + 'px' }">{{ averageVote > 0 ? averageVote.toFixed(2) : "" }}</div>
             <div class="row effort-row effort-row-small">
                 <div class="col-12">
                     <div class="effort-axis-spacer"></div>
@@ -127,12 +129,50 @@
     var resetVote = -1;
     var nullVote = -2;
 
+    // Number of options for voting
+    var numberOfOptions = 6;
+
+    // Maximum fibonacci number allowed
+    var maxOption = 13;
+
     // Get saved settings
     var userid = sessionStorage.getItem('userid');
     if (userid == null) {
         userid = Math.floor(Math.random() * 100000000);
         sessionStorage.setItem('userid', userid);
     }
+
+    // Convert the linear value of the option to it's fibonacci number
+    var linToFib = function (x) {
+        if (x < 2) {
+            return ((1 - 2) / (1 - 2)) * x;
+        } else if (x < 3) {
+            return ((2 - 3) / (2 - 3)) * x;
+        } else if (x < 4) {
+            return ((3 - 5) / (3 - 4)) * x - 3;
+        } else if (x < 5) {
+            return ((5 - 8) / (4 - 5)) * x - 7;
+        } else {
+            return ((8 - 13) / (5 - 6)) * x - 17;
+        }
+    };
+    // Convert a fibonacci number to a linear value (inverse)
+    var fibToLin = function (x) {
+        if (x < linToFib(2)) {
+            return x;
+        } else if (x < linToFib(3)) {
+            return x;
+        } else if (x < linToFib(4)) {
+            // x = ((3 - 5) / (3 - 4)) * y - 3
+            // x + 3 = ((3 - 5) / (3 - 4)) * y
+            // (x + 3) / ((3 - 5) / (3 - 4)) = y
+            return (x + 3) / ((3 - 5) / (3 - 4));
+        } else if (x < linToFib(5)) {
+            return (x + 7) / ((5 - 8) / (4 - 5));
+        } else {
+            return (x + 17) / ((8 - 13) / (5 - 6));
+        }
+    };
 
     // Vue
     export default {
@@ -214,6 +254,48 @@
                     }
                 }
                 return -1;
+            },
+            averageVote: function () {
+                var avg = 0;
+                var count = 0;
+                var users = this.allUsers;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].effort > 0) {
+                        avg += users[i].effort;
+                        count++;
+                    }
+                }
+                avg /= count;
+                return Number.isNaN(avg) ? 0 : avg;
+            },
+            averageVoteHeight: function() {
+                // max-height = (height-per-box + padding) * num-options + padding - offset
+                // max-height = (50 + 15) * 6 + 15 - 1 = 404
+                var maxHeight = 404;
+                var padding = 25 + 15;
+                var pixelRange = maxHeight - padding * 2 + 1;
+                var avg = 0;
+                var count = 0;
+                var users = this.allUsers;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].effort > 0) {
+                        avg += users[i].effort;
+                        count++;
+                    }
+                }
+                avg /= count;
+                
+                // Map a fibonacci number to a percentage of a linear scale
+                var linear = fibToLin(avg);
+                var minLin = fibToLin(1);
+                var maxLin = fibToLin(maxOption);
+
+                // Percentage between 1 and 13
+                var percentage = (linear - minLin) / (maxLin - minLin);
+                var pixels = Math.ceil(percentage * pixelRange) + padding;
+                var reverse = maxHeight - pixels;
+
+                return Number.isNaN(reverse) ? 0 : reverse;
             }
         },
         created: function () {
@@ -321,7 +403,7 @@
         content: "";
         position: absolute;
         height: 10px;
-        border-right: 1px solid #0000AA;
+        border-right: 2px solid #0000AA;
         top: 0px;
     }
     .effort-user,
@@ -331,7 +413,7 @@
         height: 50px;
         width: 50px;
         border: 1px solid #BBBBBB;
-        background: linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.01) 100%);
+        background: linear-gradient(135deg, #EEEEEE 0%, #FFFFFF 100%);
         align-items: center;
         white-space: nowrap;
         overflow: hidden;
@@ -348,5 +430,21 @@
     }
     .my-vote-tile {
         background: red;
+    }
+    .effort-container {
+        position: relative;
+    }
+    .line-average {
+        /* width-of-axis-label * num-labels + padding - line-width */
+        width: calc(65px * 10 + 15px - 2px);
+        position: absolute;
+        border-bottom: 2px solid #008000;
+        left: 50px;
+    }
+    .line-average-label {
+        color: #008000;
+        position: absolute;
+        right: 25px;
+        font-weight: bold;
     }
 </style>
