@@ -124,6 +124,9 @@
     let firebase = Firebase.initializeApp(config);
     let database = firebase.database();
 
+    var resetVote = -1;
+    var nullVote = -2;
+
     // Get saved settings
     var userid = sessionStorage.getItem('userid');
     if (userid == null) {
@@ -157,6 +160,12 @@
             }
             if (projectid == null || this.username == null) {
                 this.$router.push('/');
+            } else {
+                database.ref('effort/' + this.project + "/" + userid).set({
+                    username: this.username,
+                    effort: resetVote,
+                    timestamp: Math.round((new Date()).getTime() / 1000)
+                });
             }
         },
         computed: {
@@ -178,7 +187,7 @@
             allUsers: function () {
                 var all = [];
                 for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null) {
+                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort != nullVote) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username,
@@ -229,7 +238,6 @@
             },
             resetVotes: function () {
                 var users = this.allUsers;
-                var resetVote = -1;
                 for (var i = 0; i < users.length; i++) {
                     database.ref('effort/' + this.project + "/" + users[i].userid).set({
                         username: users[i].username,
@@ -237,6 +245,14 @@
                         timestamp: Math.round((new Date()).getTime() / 1000)
                     });
                 }
+            },
+            leave: function() {
+                database.ref('effort/' + this.project + "/" + userid).set({
+                    username: this.username,
+                    effort: nullVote,
+                    timestamp: Math.round((new Date()).getTime() / 1000)
+                });
+                this.$router.push('/');
             }
         }
     }
