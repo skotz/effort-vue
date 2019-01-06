@@ -108,12 +108,12 @@
             </div>
         </div>
         <div>
-            <div v-if="noVoteUsers.length > 0" class="row">
+            <div v-if="allUsers.length > 0" class="row">
                 <div class="col-12">
                     <div class="effort-axis voters-axis">
                         ?
                     </div>
-                    <div v-for="item in noVoteUsers" :key="item.userid" class="effort-user benched-user">{{ item.username }}</div>
+                    <div v-for="item in allUsers" :key="item.userid" :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">{{ item.username }}</div>
                 </div>
             </div>
         </div>
@@ -503,7 +503,15 @@
         display: inline-flex;
     }
     .effort-user.benched-user {
-        opacity: 0.5;
+        opacity: 0.8;
+    }
+    .effort-user.benched-user.user-voted {
+        border: 1px solid #22AA22;
+        background: linear-gradient(135deg, #88DD88 0%, #AADDAA 100%);
+    }
+    .effort-user.benched-user.user-not-voted {
+        border: 1px solid #DD5555;
+        background: linear-gradient(135deg, #DD8888 0%, #DDAAAA 100%);
     }
     .my-vote-tile {
         background: red;
