@@ -18,7 +18,7 @@
                     <div class="effort-axis-spacer"></div>
                 </div>
             </div>
-            <div v-for="i in options" v-bind:class="['row', 'effort-row', myVote == i ? 'my-vote' : '']" v-on:click="vote(i)">
+            <div v-for="i in options" v-bind:class="['row', 'effort-row', myVote == i ? 'my-vote' : '']" :key="i" v-on:click="vote(i)">
                 <div class="col-12">
                     <div class="effort-axis">
                         {{ i }}
@@ -38,7 +38,7 @@
             <div class="row effort-votes-row">
                 <div class="col-12">
                     <div class="effort-votes-axis-spacer"></div>
-                    <div v-for="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="effort-votes-axis">{{i}}</div>
+                    <div v-for="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" :key="i" class="effort-votes-axis">{{i}}</div>
                     <div class="effort-votes-axis-padding">&nbsp;</div>
                 </div>
             </div>
