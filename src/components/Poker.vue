@@ -22,7 +22,7 @@
                     <div class="effort-axis">
                         13
                     </div>
-                    <div v-for="item in projectEfforts(13)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(13)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -33,7 +33,7 @@
                     <div class="effort-axis">
                         8
                     </div>
-                    <div v-for="item in projectEfforts(8)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(8)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -44,7 +44,7 @@
                     <div class="effort-axis">
                         5
                     </div>
-                    <div v-for="item in projectEfforts(5)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(5)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -55,7 +55,7 @@
                     <div class="effort-axis">
                         3
                     </div>
-                    <div v-for="item in projectEfforts(3)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(3)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -66,7 +66,7 @@
                     <div class="effort-axis">
                         2
                     </div>
-                    <div v-for="item in projectEfforts(2)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(2)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -77,7 +77,7 @@
                     <div class="effort-axis">
                         1
                     </div>
-                    <div v-for="item in projectEfforts(1)" :key="item.userid" class="effort-user">
+                    <div v-for="item in projectEfforts(1)" :key="item.userid" class="effort-user" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -456,6 +456,7 @@
     .effort-user-insert {
         display: inline-flex;
         margin: 0 15px 0 0;
+        padding: 0 0 0 5px;
         height: 50px;
         width: 50px;
         border: 1px solid #BBBBBB;
