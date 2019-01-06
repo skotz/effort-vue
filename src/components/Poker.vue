@@ -18,67 +18,12 @@
                     <div class="effort-axis-spacer"></div>
                 </div>
             </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 13 ? 'my-vote' : '']" data-effort-row="13" v-on:click="vote(13)">
+            <div v-for="i in options" v-bind:class="['row', 'effort-row', myVote == i ? 'my-vote' : '']" v-on:click="vote(i)">
                 <div class="col-12">
                     <div class="effort-axis">
-                        13
+                        {{ i }}
                     </div>
-                    <div v-for="item in projectEfforts(13)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
-                    </div>
-                    <div class="effort-user-insert">&nbsp;</div>
-                </div>
-            </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 8 ? 'my-vote' : '']" data-effort-row="8" v-on:click="vote(8)">
-                <div class="col-12">
-                    <div class="effort-axis">
-                        8
-                    </div>
-                    <div v-for="item in projectEfforts(8)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
-                    </div>
-                    <div class="effort-user-insert">&nbsp;</div>
-                </div>
-            </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 5 ? 'my-vote' : '']" data-effort-row="5" v-on:click="vote(5)">
-                <div class="col-12">
-                    <div class="effort-axis">
-                        5
-                    </div>
-                    <div v-for="item in projectEfforts(5)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
-                    </div>
-                    <div class="effort-user-insert">&nbsp;</div>
-                </div>
-            </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 3 ? 'my-vote' : '']" data-effort-row="3" v-on:click="vote(3)">
-                <div class="col-12">
-                    <div class="effort-axis">
-                        3
-                    </div>
-                    <div v-for="item in projectEfforts(3)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
-                    </div>
-                    <div class="effort-user-insert">&nbsp;</div>
-                </div>
-            </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 2 ? 'my-vote' : '']" data-effort-row="2" v-on:click="vote(2)">
-                <div class="col-12">
-                    <div class="effort-axis">
-                        2
-                    </div>
-                    <div v-for="item in projectEfforts(2)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
-                    </div>
-                    <div class="effort-user-insert">&nbsp;</div>
-                </div>
-            </div>
-            <div v-bind:class="['row', 'effort-row', myVote == 1 ? 'my-vote' : '']" data-effort-row="1" v-on:click="vote(1)">
-                <div class="col-12">
-                    <div class="effort-axis">
-                        1
-                    </div>
-                    <div v-for="item in projectEfforts(1)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
+                    <div v-for="item in projectEfforts(i)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -93,16 +38,7 @@
             <div class="row effort-votes-row">
                 <div class="col-12">
                     <div class="effort-votes-axis-spacer"></div>
-                    <div class="effort-votes-axis">1</div>
-                    <div class="effort-votes-axis">2</div>
-                    <div class="effort-votes-axis">3</div>
-                    <div class="effort-votes-axis">4</div>
-                    <div class="effort-votes-axis">5</div>
-                    <div class="effort-votes-axis">6</div>
-                    <div class="effort-votes-axis">7</div>
-                    <div class="effort-votes-axis">8</div>
-                    <div class="effort-votes-axis">9</div>
-                    <div class="effort-votes-axis">10</div>
+                    <div v-for="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" class="effort-votes-axis">{{i}}</div>
                     <div class="effort-votes-axis-padding">&nbsp;</div>
                 </div>
             </div>
@@ -110,9 +46,7 @@
         <div>
             <div v-if="allUsers.length > 0" class="row">
                 <div class="col-12">
-                    <div class="effort-axis voters-axis">
-                        ?
-                    </div>
+                    <div class="effort-axis voters-axis">?</div>
                     <div v-for="item in allUsers" :key="item.userid" :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">{{ item.username }}</div>
                 </div>
             </div>
@@ -137,9 +71,6 @@
 
     var resetVote = -1;
     var nullVote = -2;
-
-    // Maximum fibonacci number allowed
-    var maxOption = 13;
 
     function setCookie(name, value, days) {
         var expires = "";
@@ -212,7 +143,8 @@
                 username: getCookie('username'),
                 userid: userid,
                 settings: {},
-                efforts: {}
+                efforts: {},
+                options: [13, 8, 5, 3, 2, 1]
             }
         },
         mounted() {
@@ -324,7 +256,7 @@
                 // Map a fibonacci number to a percentage of a linear scale
                 var linear = fibToLin(avg);
                 var minLin = fibToLin(1);
-                var maxLin = fibToLin(maxOption);
+                var maxLin = fibToLin(this.options[0]);
 
                 // Percentage between 1 and 13
                 var percentage = (linear - minLin) / (maxLin - minLin);
