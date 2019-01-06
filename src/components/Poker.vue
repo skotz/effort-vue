@@ -2,14 +2,15 @@
     <div class="container">
         <div class="row">
             <div class="col-8">
-                <p>Hello <b>{{ username }}</b>, you've joined the <b>{{ project }}</b> project. <router-link to="/">Leave</router-link></p>
+                <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project.</p>
             </div>
             <div class="col-4">
                 <button class="btn btn-primary float-right" v-on:click="resetVotes">Reset Votes</button>
+                <router-link to="/" class="btn btn-leave float-right">Leave</router-link>
             </div>
         </div>
         <div class="effort-container">
-            <div class="line-average" v-bind:style="{ top: averageVoteHeight + 'px' }"></div>
+            <div class="line-average" v-bind:style="{ top: (averageVoteHeight == 0 ? -100000 : averageVoteHeight) + 'px' }"></div>
             <div class="line-average-label" v-bind:style="{ top: (averageVoteHeight - 20) + 'px' }">{{ averageVote > 0 ? averageVote.toFixed(2) : "" }}</div>
             <div class="row effort-row effort-row-small">
                 <div class="col-12">
@@ -106,7 +107,14 @@
             </div>
         </div>
         <div>
-            <p class="user-list">Users: <span v-for="item in allUsers" :key="item.userid"><b>{{ item.username }}</b>{{ item.last ? "" : (item.secondToLast ? ", and " : ", ") }} </span></p>
+            <div v-if="noVoteUsers.length > 0" class="row">
+                <div class="col-12">
+                    <div class="effort-axis voters-axis">
+                        ?
+                    </div>
+                    <div v-for="item in noVoteUsers" :key="item.userid" class="effort-user benched-user">{{ item.username }}</div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -250,6 +258,16 @@
                 }
                 return all;
             },
+            noVoteUsers: function () {
+                var users = this.allUsers;
+                var noVote = [];
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].effort <= 0) {
+                        noVote.push(users[i]);
+                    }
+                }
+                return noVote;
+            },
             myVote: function() {
                 var users = this.allUsers;
                 for (var i = 0; i < users.length; i++) {
@@ -354,6 +372,9 @@
                     timestamp: Math.round((new Date()).getTime() / 1000)
                 });
                 this.$router.push('/');
+            },
+            getPath: function() {
+                return (window.location.href + '?').split('?')[0] + "?p=" + this.project;
             }
         }
     }
@@ -381,6 +402,12 @@
         width: 10px;
         border-bottom: 2px solid #0000AA;
         left: 55px;
+    }
+    .effort-axis.voters-axis {
+        border-right: 2px solid #AA0000;
+    }
+    .effort-axis.voters-axis:after {
+        border-bottom: 2px solid #AA0000;
     }
     .effort-row-small {
         line-height: 2px;
@@ -445,6 +472,9 @@
     .effort-row:hover:not(.my-vote) .effort-user-insert {
         display: inline-flex;
     }
+    .effort-user.benched-user {
+        opacity: 0.5;
+    }
     .user-list {
     }
     .my-vote-tile {
@@ -465,5 +495,8 @@
         position: absolute;
         right: 25px;
         font-weight: bold;
+    }
+    .btn-leave {
+        margin-right: 15px;
     }
 </style>
