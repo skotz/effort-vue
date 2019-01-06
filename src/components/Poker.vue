@@ -431,10 +431,10 @@
         left: 55px;
     }
     .effort-axis.voters-axis {
-        border-right: 2px solid #AA0000;
+        border-right: 2px solid #444444;
     }
     .effort-axis.voters-axis:after {
-        border-bottom: 2px solid #AA0000;
+        border-bottom: 2px solid #444444;
     }
     .effort-row-small {
         line-height: 2px;
