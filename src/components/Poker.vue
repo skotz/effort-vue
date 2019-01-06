@@ -1,15 +1,16 @@
 <template>
     <div class="container">
         <div class="row">
-            <div class="col-8">
+            <div class="col-6">
                 <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project.</p>
             </div>
-            <div class="col-4">
-                <button class="btn btn-primary float-right" v-on:click="resetVotes">Reset Votes</button>
+            <div class="col-6">
+                <button class="btn btn-primary float-right" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
+                <button class="btn btn-primary btn-leave float-right" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
                 <router-link to="/" class="btn btn-leave float-right">Leave</router-link>
             </div>
         </div>
-        <div class="effort-container">
+        <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
             <div class="line-average" v-bind:style="{ top: (averageVoteHeight == 0 ? -100000 : averageVoteHeight) + 'px' }"></div>
             <div class="line-average-label" v-bind:style="{ top: (averageVoteHeight - 20) + 'px' }">{{ averageVote > 0 ? averageVote.toFixed(2) : "" }}</div>
             <div class="row effort-row effort-row-small">
@@ -22,7 +23,7 @@
                     <div class="effort-axis">
                         13
                     </div>
-                    <div v-for="item in projectEfforts(13)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(13)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -33,7 +34,7 @@
                     <div class="effort-axis">
                         8
                     </div>
-                    <div v-for="item in projectEfforts(8)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(8)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -44,7 +45,7 @@
                     <div class="effort-axis">
                         5
                     </div>
-                    <div v-for="item in projectEfforts(5)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(5)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -55,7 +56,7 @@
                     <div class="effort-axis">
                         3
                     </div>
-                    <div v-for="item in projectEfforts(3)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(3)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -66,7 +67,7 @@
                     <div class="effort-axis">
                         2
                     </div>
-                    <div v-for="item in projectEfforts(2)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(2)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -77,7 +78,7 @@
                     <div class="effort-axis">
                         1
                     </div>
-                    <div v-for="item in projectEfforts(1)" :key="item.userid" class="effort-user" :title="item.username">
+                    <div v-for="item in projectEfforts(1)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
                         {{ item.username }}
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
@@ -209,6 +210,8 @@
             return {
                 project: getCookie('project'),
                 username: getCookie('username'),
+                userid: userid,
+                settings: {},
                 efforts: {}
             }
         },
@@ -234,6 +237,15 @@
                     timestamp: Math.round((new Date()).getTime() / 1000)
                 });
             }
+            var proj = this.project;
+            database.ref("settings/" + this.project).once('value').then(function (snapshot) {
+                var val = snapshot.val();
+                if (val == null || typeof val.hidden === 'undefined') {
+                    database.ref('settings/' + proj).set({
+                        hidden: true
+                    });
+                }
+            });
         },
         computed: {
             allUsers: function () {
@@ -246,10 +258,12 @@
                             effort: this.efforts[i].effort,
                             voted: this.efforts[i].effort > 0,
                             last: false,
-                            secondToLast: false
+                            secondToLast: false,
+                            timestamp: this.efforts[i].timestamp
                         });
                     }
                 }
+                all.sort(function (c, n) { return c.timestamp - n.timestamp });
                 if (all.length > 0) {
                     all[all.length - 1].last = true;
                 }
@@ -318,14 +332,19 @@
                 var reverse = maxHeight - pixels;
 
                 return Number.isNaN(reverse) ? 0 : reverse;
+            },
+            votesHidden: function() {
+                return this.noVoteUsers.length > 0 && this.settings.hidden;
             }
         },
         created: function () {
             this.$bindAsObject('efforts', database.ref("effort/" + this.project))
+            this.$bindAsObject('settings', database.ref("settings/" + this.project))
         },
         watch: {
             project: function () {
                 this.$bindAsObject('efforts', database.ref("effort/" + this.project))
+                this.$bindAsObject('settings', database.ref("settings/" + this.project))
             }
         },
         methods: {
@@ -364,6 +383,9 @@
                         timestamp: Math.round((new Date()).getTime() / 1000)
                     });
                 }
+                database.ref('settings/' + this.project).set({
+                    hidden: true
+                });
             },
             leave: function() {
                 database.ref('effort/' + this.project + "/" + userid).set({
@@ -375,6 +397,11 @@
             },
             getPath: function() {
                 return (window.location.href + '?').split('?')[0] + "?p=" + this.project;
+            },
+            showVotes: function() {
+                database.ref('settings/' + this.project).set({
+                    hidden: !this.settings.hidden
+                });
             }
         }
     }
@@ -464,6 +491,8 @@
         align-items: center;
         white-space: nowrap;
         overflow: hidden;
+        position: relative;
+        top: -4px;
     }
     .effort-user-insert {
         display: none;
@@ -475,8 +504,6 @@
     }
     .effort-user.benched-user {
         opacity: 0.5;
-    }
-    .user-list {
     }
     .my-vote-tile {
         background: red;
@@ -499,5 +526,10 @@
     }
     .btn-leave {
         margin-right: 15px;
+    }
+    .effort-hide .effort-other,
+    .effort-hide .line-average,
+    .effort-hide .line-average-label {
+        display: none;
     }
 </style>
