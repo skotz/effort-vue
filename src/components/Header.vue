@@ -3,7 +3,7 @@
       <div class="row">
         <div class="col-12">
           <h1>Planning Poker</h1>
-          <p>An <a href="https://github.com/skotz/effort-vue">open source</a> team estimation tool build with Vue and Firebase.</p>
+          <p>An <a href="https://github.com/skotz/effort-vue">open source</a> team estimation tool built with Vue and Firebase.</p>
         </div>
       </div>
     </div>
