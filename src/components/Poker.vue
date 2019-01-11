@@ -71,7 +71,14 @@
 
     var resetVote = -1;
     var nullVote = -2;
+    
+    var timeoutSeconds = 20;
+    var keepaliveMilliseconds = 5000;
 
+    function getUtc() {
+        var date = new Date()
+        return (date.getTime() + date.getTimezoneOffset() * 60 * 1000) / 1000;
+    }
     function setCookie(name, value, days) {
         var expires = "";
         if (days) {
@@ -166,7 +173,7 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: resetVote,
-                    timestamp: Math.round((new Date()).getTime() / 1000)
+                    timestamp: getUtc()
                 });
             }
             var proj = this.project;
@@ -178,12 +185,21 @@
                     });
                 }
             });
+
+            var keepalive = this.keepalive;
+            setInterval(function () {
+                keepalive();
+            }, keepaliveMilliseconds);
         },
         computed: {
             allUsers: function () {
                 var all = [];
                 for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort != nullVote && this.efforts[i].username.length) {
+                    if (this.efforts[i] != null && 
+                        this.efforts[i].username != null && 
+                        this.efforts[i].effort != nullVote && 
+                        this.efforts[i].username.length &&
+                        this.efforts[i].timestamp > getUtc() - timeoutSeconds) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username,
@@ -283,7 +299,11 @@
             projectEfforts: function (effort) {
                 var all = [];
                 for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort == effort && this.efforts[i].username.length) {
+                    if (this.efforts[i] != null && 
+                        this.efforts[i].username != null && 
+                        this.efforts[i].effort == effort && 
+                        this.efforts[i].username.length &&
+                        this.efforts[i].timestamp > getUtc() - timeoutSeconds) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username, 
@@ -303,7 +323,7 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: effort,
-                    timestamp: Math.round((new Date()).getTime() / 1000)
+                    timestamp: getUtc()
                 });
             },
             resetVotes: function () {
@@ -312,7 +332,7 @@
                     database.ref('effort/' + this.project + "/" + users[i].userid).set({
                         username: users[i].username,
                         effort: resetVote,
-                        timestamp: Math.round((new Date()).getTime() / 1000)
+                        timestamp: getUtc()
                     });
                 }
                 database.ref('settings/' + this.project).set({
@@ -323,7 +343,7 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: nullVote,
-                    timestamp: Math.round((new Date()).getTime() / 1000)
+                    timestamp: getUtc()
                 });
                 this.$router.push('/');
             },
@@ -333,6 +353,11 @@
             showVotes: function() {
                 database.ref('settings/' + this.project).set({
                     hidden: !this.settings.hidden
+                });
+            },
+            keepalive: function() {
+                database.ref('effort/' + this.project + "/" + userid).update({
+                    timestamp: getUtc()
                 });
             }
         }
