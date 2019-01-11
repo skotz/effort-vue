@@ -38,7 +38,7 @@
             <div class="row effort-votes-row">
                 <div class="col-12">
                     <div class="effort-votes-axis-spacer"></div>
-                    <div v-for="i in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" :key="i" class="effort-votes-axis">{{i}}</div>
+                    <div v-for="i in labels" :key="i" class="effort-votes-axis">{{i}}</div>
                     <div class="effort-votes-axis-padding">&nbsp;</div>
                 </div>
             </div>
@@ -151,7 +151,8 @@
                 userid: userid,
                 settings: {},
                 efforts: {},
-                options: [13, 8, 5, 3, 2, 1]
+                options: [13, 8, 5, 3, 2, 1],
+                labels: [1, 2, 3, 4]
             }
         },
         mounted() {
@@ -190,6 +191,13 @@
             setInterval(function () {
                 keepalive();
             }, keepaliveMilliseconds);
+
+            this.$nextTick(() => {
+                window.addEventListener('resize', () => {
+                    this.updateLabels();
+                });
+            })
+            this.updateLabels();
         },
         computed: {
             allUsers: function () {
@@ -359,6 +367,31 @@
                 database.ref('effort/' + this.project + "/" + userid).update({
                     timestamp: getUtc()
                 });
+            },
+            updateLabels: function() {
+                // lazy programming
+                var newLabels = [1, 2, 3, 4];
+                if (screen.width >= 576) {
+                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 7; i++) {
+                        newLabels.push(i);
+                    }
+                }
+                if (screen.width >= 768) {
+                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 9; i++) {
+                        newLabels.push(i);
+                    }
+                }
+                if (screen.width >= 992) {
+                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 13; i++) {
+                        newLabels.push(i);
+                    }
+                }
+                if (screen.width >= 1200) {
+                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 16; i++) {
+                        newLabels.push(i);
+                    }
+                }
+                this.labels = newLabels;
             }
         }
     }
@@ -478,7 +511,7 @@
     }
     .line-average {
         /* width-of-axis-label * num-labels + padding - line-width */
-        width: calc(65px * 10 + 15px - 2px);
+        width: calc(65px * 4 + 15px - 2px);
         position: absolute;
         border-bottom: 2px solid #008000;
         left: 50px;
@@ -496,5 +529,26 @@
     .effort-hide .line-average,
     .effort-hide .line-average-label {
         display: none;
+    }
+
+    @media (min-width: 576px) {
+        .line-average {
+            width: calc(65px * 7 + 15px - 2px);
+        }
+    }
+    @media (min-width: 768px) {
+        .line-average {
+            width: calc(65px * 9 + 15px - 2px);
+        }
+    }
+    @media (min-width: 992px) {
+        .line-average {
+            width: calc(65px * 13 + 15px - 2px);
+        }
+    }
+    @media (min-width: 1200px) {
+        .line-average {
+            width: calc(65px * 16 + 15px - 2px);
+        }
     }
 </style>

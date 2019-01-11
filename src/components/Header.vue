@@ -16,10 +16,10 @@
 </script>
 
 <style>
-    .container {
+    /* .container {
         max-width: 768px;
         min-width: 768px;
-    }
+    } */
     .header {
         margin-top: 15px;
     }
