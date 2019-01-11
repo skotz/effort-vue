@@ -372,22 +372,22 @@
                 // lazy programming
                 var newLabels = [1, 2, 3, 4];
                 if (screen.width >= 576) {
-                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 7; i++) {
+                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 7; i++) {
                         newLabels.push(i);
                     }
                 }
                 if (screen.width >= 768) {
-                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 9; i++) {
+                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 9; i++) {
                         newLabels.push(i);
                     }
                 }
                 if (screen.width >= 992) {
-                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 13; i++) {
+                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 13; i++) {
                         newLabels.push(i);
                     }
                 }
                 if (screen.width >= 1200) {
-                    for (var i = newLabels[newLabels.length - 1] + 1; i <= 16; i++) {
+                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 16; i++) {
                         newLabels.push(i);
                     }
                 }
