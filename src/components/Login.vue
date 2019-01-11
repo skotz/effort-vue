@@ -1,7 +1,12 @@
 <template>
     <div class="container">
+        <div class="row" v-if="errors.length">
+            <div class="col-12">
+                <p v-for="error in errors" :key="error" class="error">{{error}}</p>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-5">
+            <div class="col-4">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="project-label">Project</span>
@@ -9,7 +14,7 @@
                     <input v-model="project" placeholder="Project" class="form-control" aria-describedby="project-label" />
                 </div>
             </div>
-            <div class="col-5">
+            <div class="col-4">
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="username-label">Username</span>
@@ -19,7 +24,12 @@
             </div>
             <div class="col-2">
                 <div class="input-group">
-                    <button type="button" class="btn btn-primary btn-save" v-on:click="saveData()">Go</button>
+                    <button type="button" class="btn btn-primary btn-save" v-on:click="saveData(false)">Go</button>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="input-group">
+                    <button type="button" class="btn btn-primary btn-save" v-on:click="saveData(true)">Spectate</button>
                 </div>
             </div>
         </div>
@@ -60,14 +70,24 @@
         data: function () {
             return {
                 project: getCookie('project'),
-                username: getCookie('username')
+                username: getCookie('username'),
+                errors: []
             }
         },
         methods: {
-            saveData: function () {
-                setCookie('project', this.project);
-                setCookie('username', this.username);
-                this.$router.push('/project');
+            saveData: function (spec) {
+                this.errors = [];
+                if (!this.project && !spec) {
+                    this.errors.push("Project is required");
+                }
+                else if (!this.username && !spec) {
+                    this.errors.push("Username is required");
+                }
+                else {
+                    setCookie('project', this.project);
+                    setCookie('username', this.username);
+                    this.$router.push('/project');
+                }
             }
         }
     }
@@ -76,5 +96,8 @@
 <style scoped>
     .btn-save {
         width: 100%;
+    }
+    .error {
+        color: #FF0000;
     }
 </style>

@@ -183,7 +183,7 @@
             allUsers: function () {
                 var all = [];
                 for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort != nullVote) {
+                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort != nullVote && this.efforts[i].username.length) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username,
@@ -283,7 +283,7 @@
             projectEfforts: function (effort) {
                 var all = [];
                 for (var i in this.efforts) {
-                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort == effort) {
+                    if (this.efforts[i] != null && this.efforts[i].username != null && this.efforts[i].effort == effort && this.efforts[i].username.length) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username, 
