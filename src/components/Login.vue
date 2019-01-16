@@ -85,7 +85,7 @@
                 }
                 else {
                     setCookie('project', this.project);
-                    setCookie('username', this.username);
+                    setCookie('username', spec ? '' : this.username);
                     this.$router.push('/project');
                 }
             }

@@ -7,7 +7,7 @@
             <div class="col-6">
                 <button class="btn btn-primary float-right" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
                 <button class="btn btn-primary btn-leave float-right" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
-                <router-link to="/" class="btn btn-leave float-right">Leave</router-link>
+                <button class="btn btn-leave float-right" v-on:click="leave">Leave</button>
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
@@ -152,7 +152,8 @@
                 settings: {},
                 efforts: {},
                 options: [13, 8, 5, 3, 2, 1],
-                labels: [1, 2, 3, 4]
+                labels: [1, 2, 3, 4],
+                ping: null
             }
         },
         mounted() {
@@ -174,7 +175,7 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: resetVote,
-                    timestamp: getUtc()
+                    keepalive: getUtc()
                 });
             }
             var proj = this.project;
@@ -188,7 +189,8 @@
             });
 
             var keepalive = this.keepalive;
-            setInterval(function () {
+            clearInterval(this.ping);
+            this.ping = setInterval(function () {
                 keepalive();
             }, keepaliveMilliseconds);
 
@@ -207,7 +209,7 @@
                         this.efforts[i].username != null && 
                         this.efforts[i].effort != nullVote && 
                         this.efforts[i].username.length &&
-                        this.efforts[i].timestamp > getUtc() - timeoutSeconds) {
+                        this.efforts[i].keepalive > getUtc() - timeoutSeconds) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username,
@@ -311,7 +313,7 @@
                         this.efforts[i].username != null && 
                         this.efforts[i].effort == effort && 
                         this.efforts[i].username.length &&
-                        this.efforts[i].timestamp > getUtc() - timeoutSeconds) {
+                        this.efforts[i].keepalive > getUtc() - timeoutSeconds) {
                         all.push({ 
                             userid: i,
                             username: this.efforts[i].username, 
@@ -331,7 +333,8 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: effort,
-                    timestamp: getUtc()
+                    timestamp: getUtc(),
+                    keepalive: getUtc()
                 });
             },
             resetVotes: function () {
@@ -340,7 +343,8 @@
                     database.ref('effort/' + this.project + "/" + users[i].userid).set({
                         username: users[i].username,
                         effort: resetVote,
-                        timestamp: getUtc()
+                        timestamp: getUtc(),
+                        keepalive: getUtc()
                     });
                 }
                 database.ref('settings/' + this.project).set({
@@ -351,8 +355,10 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: nullVote,
-                    timestamp: getUtc()
+                    timestamp: getUtc(),
+                    keepalive: getUtc()
                 });
+                clearInterval(this.ping);
                 this.$router.push('/');
             },
             getPath: function() {
@@ -365,7 +371,7 @@
             },
             keepalive: function() {
                 database.ref('effort/' + this.project + "/" + userid).update({
-                    timestamp: getUtc()
+                    keepalive: getUtc()
                 });
             },
             updateLabels: function() {
