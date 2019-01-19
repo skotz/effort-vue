@@ -106,36 +106,35 @@
         setCookie('userid', userid);
     }
 
+    // The available options (the last one isn't displayed and is only for calculating where the average line goes)
+    var options = [1, 2, 3, 5, 8, 13, 20, 40];
+
+    // m = (y1-y2)/(x1-x2)
+    // b = y-m*x
+    // fib = y = mx+b
+    // lin = x = (y-b)/m
+
     // Convert the linear value of the option to it's fibonacci number
     var linToFib = function (x) {
-        if (x < 2) {
-            return ((1 - 2) / (1 - 2)) * x;
-        } else if (x < 3) {
-            return ((2 - 3) / (2 - 3)) * x;
-        } else if (x < 4) {
-            return ((3 - 5) / (3 - 4)) * x - 3;
-        } else if (x < 5) {
-            return ((5 - 8) / (4 - 5)) * x - 7;
-        } else {
-            return ((8 - 13) / (5 - 6)) * x - 17;
-        }
+        var i = Math.floor(x);
+        var m = options[i] - options[i - 1];
+        var b = options[i - 1] - m * i;
+        var y = m * x + b
+        // console.log('i = ' + i + ' m = ' + m + ' b = ' + b + ' x = ' + x + ' y = ' + y);
+        return y;
     };
+
     // Convert a fibonacci number to a linear value (inverse)
-    var fibToLin = function (x) {
-        if (x < linToFib(2)) {
-            return x;
-        } else if (x < linToFib(3)) {
-            return x;
-        } else if (x < linToFib(4)) {
-            // x = ((3 - 5) / (3 - 4)) * y - 3
-            // x + 3 = ((3 - 5) / (3 - 4)) * y
-            // (x + 3) / ((3 - 5) / (3 - 4)) = y
-            return (x + 3) / ((3 - 5) / (3 - 4));
-        } else if (x < linToFib(5)) {
-            return (x + 7) / ((5 - 8) / (4 - 5));
-        } else {
-            return (x + 17) / ((8 - 13) / (5 - 6));
+    var fibToLin = function (y) {
+        var i = 0;
+        while (options[i] < y) {
+            i++;
         }
+        var m = i == 0 ? 1 : options[i] - options[i - 1];
+        var b = i == 0 ? 0 : options[i - 1] - m * i;
+        var x = (y - b) / m;
+        // console.log('i = ' + i + ' m = ' + m + ' b = ' + b + ' x = ' + x + ' y = ' + y);
+        return x;
     };
 
     // Vue
@@ -151,7 +150,7 @@
                 userid: userid,
                 settings: {},
                 efforts: {},
-                options: [13, 8, 5, 3, 2, 1],
+                options: options.slice(0, -1).reverse(),
                 labels: [1, 2, 3, 4],
                 ping: null
             }
@@ -265,7 +264,7 @@
             averageVoteHeight: function() {
                 // max-height = (height-per-box + padding) * num-options + padding - offset
                 // max-height = (50 + 15) * 6 + 15 - 1 = 404
-                var maxHeight = 404;
+                var maxHeight = (50 + 15) * this.options.length + 15 - 1;
                 var padding = 25 + 15;
                 var pixelRange = maxHeight - padding * 2 + 1;
                 var avg = 0;
