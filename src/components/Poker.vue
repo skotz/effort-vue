@@ -114,15 +114,15 @@
     // fib = y = mx+b
     // lin = x = (y-b)/m
 
-    // Convert the linear value of the option to it's fibonacci number
-    var linToFib = function (x) {
-        var i = Math.floor(x);
-        var m = options[i] - options[i - 1];
-        var b = options[i - 1] - m * i;
-        var y = m * x + b
-        // console.log('i = ' + i + ' m = ' + m + ' b = ' + b + ' x = ' + x + ' y = ' + y);
-        return y;
-    };
+    //// Convert the linear value of the option to it's fibonacci number
+    //var linToFib = function (x) {
+    //    var i = Math.floor(x);
+    //    var m = options[i] - options[i - 1];
+    //    var b = options[i - 1] - m * i;
+    //    var y = m * x + b
+    //    // console.log('i = ' + i + ' m = ' + m + ' b = ' + b + ' x = ' + x + ' y = ' + y);
+    //    return y;
+    //};
 
     // Convert a fibonacci number to a linear value (inverse)
     var fibToLin = function (y) {
