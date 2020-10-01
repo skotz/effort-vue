@@ -76,8 +76,7 @@
     var keepaliveMilliseconds = 5000;
 
     function getUtc() {
-        var date = new Date()
-        return (date.getTime() + date.getTimezoneOffset() * 60 * 1000) / 1000;
+        return + new Date() / 1000;
     }
     function setCookie(name, value, days) {
         var expires = "";
