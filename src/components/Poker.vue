@@ -375,22 +375,22 @@
             updateLabels: function() {
                 // lazy programming
                 var newLabels = [1, 2, 3, 4];
-                if (screen.width >= 576) {
-                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 7; i++) {
+                if (window.innerWidth >= 576) {
+                    for (let i = newLabels[newLabels.length - 1] + 1; i <= 6; i++) {
                         newLabels.push(i);
                     }
                 }
-                if (screen.width >= 768) {
+                if (window.innerWidth >= 768) {
                     for (let i = newLabels[newLabels.length - 1] + 1; i <= 9; i++) {
                         newLabels.push(i);
                     }
                 }
-                if (screen.width >= 992) {
+                if (window.innerWidth >= 992) {
                     for (let i = newLabels[newLabels.length - 1] + 1; i <= 13; i++) {
                         newLabels.push(i);
                     }
                 }
-                if (screen.width >= 1200) {
+                if (window.innerWidth >= 1200) {
                     for (let i = newLabels[newLabels.length - 1] + 1; i <= 16; i++) {
                         newLabels.push(i);
                     }
