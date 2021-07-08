@@ -477,9 +477,9 @@
     .effort-user-insert {
         display: inline-flex;
         margin: 0 15px 0 0;
-        padding: 0 0 0 5px;
+        padding: 0 5px;
         height: 50px;
-        width: 50px;
+        max-width: 200px;
         border: 1px solid #BBBBBB;
         background: linear-gradient(135deg, #EEEEEE 0%, #FFFFFF 100%);
         align-items: center;
