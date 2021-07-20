@@ -33,6 +33,13 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="identicon">
+                    <img :src="getIdenticon(username)" :alt="username">
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -88,6 +95,19 @@
                     setCookie('username', spec ? '' : this.username);
                     this.$router.push('/project');
                 }
+            },
+            hash: function(value) {
+                // eslint-disable-next-line
+                return sha256(value);
+            },
+            getIdenticon: function(name) {
+                var hash = this.hash(name);
+                // eslint-disable-next-line
+                var data = new Identicon(hash, {
+                    background: [ 255, 255, 255, 128 ],
+                    size: 100
+                }).toString();
+                return 'data:image/png;base64,' + data;
             }
         }
     }
@@ -99,5 +119,11 @@
     }
     .error {
         color: #FF0000;
+    }
+    .identicon {
+        border: 1px solid #BBBBBB;
+        width: 102px;
+        height: 102px;
+        margin: 30px auto;
     }
 </style>

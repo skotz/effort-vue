@@ -24,7 +24,7 @@
                         {{ i }}
                     </div>
                     <div v-for="item in projectEfforts(i)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        {{ item.username }}
+                        <img :src="getIdenticon(item.username)" :alt="item.username">
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
@@ -47,7 +47,11 @@
             <div v-if="allUsers.length > 0" class="row">
                 <div class="col-12">
                     <div class="effort-axis voters-axis">?</div>
-                    <div v-for="item in allUsers" :key="item.userid" :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">{{ item.username }}</div>
+                    <div v-for="item in allUsers" 
+                        :key="item.userid" 
+                        :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">
+                        <img :src="getIdenticon(item.username)" :alt="item.username">
+                    </div>
                 </div>
             </div>
         </div>
@@ -396,6 +400,19 @@
                     }
                 }
                 this.labels = newLabels;
+            },
+            hash: function(value) {
+                // eslint-disable-next-line
+                return sha256(value);
+            },
+            getIdenticon: function(name) {
+                var hash = this.hash(name);
+                // eslint-disable-next-line
+                var data = new Identicon(hash, {
+                    background: [ 255, 255, 255, 128 ],
+                    size: 48
+                }).toString();
+                return 'data:image/png;base64,' + data;
             }
         }
     }
@@ -475,9 +492,9 @@
     }
     .effort-user,
     .effort-user-insert {
-        display: inline-flex;
+        display: inline-table;
         margin: 0 15px 0 0;
-        padding: 0 0 0 5px;
+        padding: 0;
         height: 50px;
         width: 50px;
         border: 1px solid #BBBBBB;
