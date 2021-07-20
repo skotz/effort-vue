@@ -24,7 +24,7 @@
                         {{ i }}
                     </div>
                     <div v-for="item in projectEfforts(i)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        <img :src="getIdenticon(item.username)" :alt="item.username">
+                        <img :src="getIdenticon(item.username)" :alt="item.username" :title="item.username">
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
@@ -50,7 +50,7 @@
                     <div v-for="item in allUsers" 
                         :key="item.userid" 
                         :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">
-                        <img :src="getIdenticon(item.username)" :alt="item.username">
+                        <img :src="getIdenticon(item.username)" :alt="item.username" :title="item.username">
                     </div>
                 </div>
             </div>
