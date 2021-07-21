@@ -403,7 +403,7 @@
             },
             hash: function(value) {
                 // eslint-disable-next-line
-                return sha256(value);
+                return sha256("" + value);
             },
             getIdenticon: function(name) {
                 var hash = this.hash(name);
