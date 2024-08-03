@@ -5,14 +5,30 @@
                 <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project as {{ getUserLevel }}.</p>
                 <p v-if="!hasHost"><em class="text-danger">Waiting for host to join...</em></p>
             </div>
-            <div class="col-6">
-                <button class="btn btn-primary float-right" v-if="this.level == 2" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
-                <button class="btn btn-primary float-right mr-15" v-if="this.level == 2" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
-                <button class="btn btn-secondary float-right mr-15" v-on:click="leave">Leave</button>
-                <button class="btn btn-danger float-right mr-15" v-if="!hasHost" v-on:click="host">Host</button>
+            <div class="col-6 fix-right">
+                <button class="btn btn-primary ml-15 float-right" v-if="this.level == '2'" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
+                <div class="btn-group ml-15 float-right">
+                    <button class="btn btn-primary" v-if="this.level == '2'" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
+                    <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" 
+                            v-if="this.level == '2'" 
+                            :disabled="this.noVoteUsers.length == 0" 
+                            title="Start a countdown after which votes will be shown."
+                            data-toggle="dropdown" 
+                            aria-haspopup="true" 
+                            aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#" v-on:click="showVotes">Reveal now</a>
+                        <a class="dropdown-item" href="#" v-on:click="startShowTimer(10)">Reveal in 10 seconds</a>
+                    </div>
+                </div>
+                <button class="btn btn-secondary float-right ml-15" v-on:click="leave">Leave</button>
+                <button class="btn btn-danger float-right ml-15" v-if="!hasHost && this.level == '1'" v-on:click="host">Host</button>
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
+            <div class="countdown" v-show="remainingTime > 0 && votesHidden">{{remainingTime}}</div>
             <div class="line-average" v-bind:style="{ top: (averageVoteHeight == 0 ? -100000 : averageVoteHeight) + 'px' }"></div>
             <div class="line-average-label" v-bind:style="{ top: (averageVoteHeight - 20) + 'px' }">{{ averageVote > 0 ? averageVote.toFixed(2) : "" }}</div>
             <div class="row effort-row effort-row-small">
@@ -200,6 +216,9 @@
                 options: options.slice(0, -1).reverse(),
                 labels: [1, 2, 3, 4],
                 ping: null,
+                countdown: null,
+                startedCountdown: false,
+                remainingTime: -1,
                 confetti: false,
             }
         },
@@ -230,7 +249,8 @@
                 var val = snapshot.val();
                 if (val == null || typeof val.hidden === 'undefined') {
                     database.ref('settings/' + proj).set({
-                        hidden: true
+                        hidden: true,
+                        showAt: -1,
                     });
                 }
             });
@@ -241,6 +261,14 @@
                 keepalive();
             }, keepaliveMilliseconds);
             keepalive();
+
+            // Countdown timer
+            var handleCountdown = this.handleCountdown;
+            clearInterval(this.countdown);
+            this.countdown = setInterval(function () {
+                handleCountdown();
+            }, 250);
+            handleCountdown();
 
             this.$nextTick(() => {
                 window.addEventListener('resize', () => {
@@ -343,7 +371,6 @@
                     return false;
                 }
                 for (var i = 0; i < users.length; i++) {
-                    console.log(users[i].effort)
                     if (last == -1) {
                         last = users[i].effort;
                     }
@@ -397,6 +424,33 @@
             }
         },
         methods: {
+            startShowTimer: function(seconds) {
+                this.startedCountdown = true;
+                database.ref('settings/' + this.project).set({
+                    hidden: true,
+                    showAt: getUtc() + seconds,
+                });
+            },
+            handleCountdown: function () {
+                if (this.settings == null || this.settings.showAt == null) {
+                    return;
+                }
+                var remaining = this.settings.showAt - getUtc();
+                if (remaining > 0) {
+                    this.remainingTime = Math.floor(remaining);
+                } else {
+                    this.remainingTime = -1;
+                    if (this.startedCountdown) {
+                        this.startedCountdown = false;
+                        if (this.level == '2') {
+                            database.ref('settings/' + this.project).set({
+                                hidden: false,
+                                showAt: -1,
+                            });
+                        }
+                    }
+                }
+            },
             host: function() {
                 this.level = '2';
                 this.saveData();
@@ -456,7 +510,8 @@
                     });
                 }
                 database.ref('settings/' + this.project).set({
-                    hidden: true
+                    hidden: true,
+                    showAt: -1,
                 });
             },
             leave: function() {
@@ -475,7 +530,8 @@
             },
             showVotes: function() {
                 database.ref('settings/' + this.project).set({
-                    hidden: !this.settings.hidden
+                    hidden: !this.settings.hidden,
+                    showAt: -1,
                 });
             },
             keepalive: function() {
@@ -527,6 +583,15 @@
 </script>
 
 <style scoped>
+    .countdown {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 200px;
+        width: 100%;
+        text-align: center;
+        color: #6c757d;
+    }
     .effort-row {
         cursor: pointer;
     }
@@ -652,8 +717,8 @@
         right: 25px;
         font-weight: bold;
     }
-    .mr-15 {
-        margin-right: 15px;
+    .ml-15 {
+        margin-left: 15px;
     }
     .effort-hide .effort-other,
     .effort-hide .line-average,

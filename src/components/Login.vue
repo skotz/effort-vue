@@ -52,10 +52,9 @@
             <div class="col-12 col-lg-6">
                 <div class="row">
                     <div class="col-12 mb-3">
-                        <h3>Learn the game</h3>
+                        <h3>How to participate</h3>
                     </div>
                     <div class="col-12">
-                        <p>Read the instructions at <a href="https://www.mountaingoatsoftware.com/agile/planning-poker" target="_blank">Mountain Goat Software</a>.</p>
                         <p><strong>Join</strong> a project session to vote.</p>
                         <p><strong>Host</strong> a project session to vote, show votes, and clear votes.</p>
                         <p><strong>Spectate</strong> a project session to watch.</p>
