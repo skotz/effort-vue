@@ -7,9 +7,9 @@
             </div>
             <div class="col-6">
                 <button class="btn btn-primary float-right" v-if="this.level == 2" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
-                <button class="btn btn-primary btn-leave float-right" v-if="this.level == 2" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
-                <button class="btn btn-leave float-right" v-on:click="leave">Leave</button>
-                <button class="btn btn-leave float-right btn-danger" v-if="!hasHost" v-on:click="host">Host</button>
+                <button class="btn btn-primary float-right mr-15" v-if="this.level == 2" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
+                <button class="btn btn-secondary float-right mr-15" v-on:click="leave">Leave</button>
+                <button class="btn btn-danger float-right mr-15" v-if="!hasHost" v-on:click="host">Host</button>
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
@@ -62,6 +62,7 @@
 
 <script>
     import Firebase from 'firebase'
+    import confetti from 'canvas-confetti'
 
     // Initialize Firebase
     var config = {
@@ -142,6 +143,45 @@
         return x;
     };
 
+    // Confetti
+    var showConfetti = function() {
+        var count = 200;
+        var defaults = {
+            origin: { y: 0.7 }
+        };
+
+        function fire(particleRatio, opts) {
+            confetti({
+                ...defaults,
+                ...opts,
+                particleCount: Math.floor(count * particleRatio)
+            });
+        }
+
+        fire(0.25, {
+            spread: 26,
+            startVelocity: 55,
+        });
+        fire(0.2, {
+            spread: 60,
+        });
+        fire(0.35, {
+            spread: 100,
+            decay: 0.91,
+            scalar: 0.8
+        });
+        fire(0.1, {
+            spread: 120,
+            startVelocity: 25,
+            decay: 0.92,
+            scalar: 1.2
+        });
+        fire(0.1, {
+            spread: 120,
+            startVelocity: 45,
+        });
+    }
+
     // Vue
     export default {
         name: 'Poker',
@@ -153,12 +193,14 @@
                 project: getCookie('project'),
                 username: getCookie('username'),
                 level: getCookie('level'),
+                allowConfetti: getCookie('confetti') != 'n',
                 userid: userid,
                 settings: {},
                 efforts: {},
                 options: options.slice(0, -1).reverse(),
                 labels: [1, 2, 3, 4],
-                ping: null
+                ping: null,
+                confetti: false,
             }
         },
         mounted() {
@@ -294,6 +336,23 @@
                 avg /= count;
                 return Number.isNaN(avg) ? 0 : avg;
             },
+            consensus: function () {
+                var last = -1;
+                var users = this.allUsers;
+                if (users.length == 0) {
+                    return false;
+                }
+                for (var i = 0; i < users.length; i++) {
+                    console.log(users[i].effort)
+                    if (last == -1) {
+                        last = users[i].effort;
+                    }
+                    if (users[i].effort <= 0 || users[i].effort != last) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             averageVoteHeight: function() {
                 // max-height = (height-per-box + padding) * num-options + padding - offset
                 // max-height = (50 + 15) * 6 + 15 - 1 = 404
@@ -357,6 +416,16 @@
                             timestamp: this.efforts[i].timestamp != null ? parseInt(this.efforts[i].timestamp, 10) : 0
                         });
                     }
+                }
+                if (this.consensus) {
+                    if (!this.confetti) {
+                        this.confetti = true;
+                        if (this.allowConfetti) {
+                            showConfetti();
+                        }
+                    }
+                } else {
+                    this.confetti = false;
                 }
                 all.sort(function (c, n) { return c.timestamp - n.timestamp });
                 return all;
@@ -583,7 +652,7 @@
         right: 25px;
         font-weight: bold;
     }
-    .btn-leave {
+    .mr-15 {
         margin-right: 15px;
     }
     .effort-hide .effort-other,

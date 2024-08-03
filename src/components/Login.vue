@@ -28,6 +28,14 @@
                             <img :src="getIdenticon(username)" :alt="name" class="identicon-inner" title="Your avatar (generated based on your name)">
                         </div>
                     </div>
+                    <div class="col-12 mb-3">
+                        <div class="input-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" v-model="consensusConfetti" id="consensusConfetti">
+                                <label class="custom-control-label" for="consensusConfetti"> Show confetti upon consensus</label>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-8">
                         <div class="input-group justify-content-start">
                             <button type="button" class="btn btn-secondary btn-save" v-on:click="saveData(2)" title="You can vote, show votes, and clear votes.">Host</button>
@@ -94,6 +102,7 @@
                 project: getCookie('project'),
                 username: getCookie('username'),
                 level: getCookie('level'),
+                consensusConfetti: getCookie('confetti') != "n",
                 errors: []
             }
         },
@@ -110,6 +119,7 @@
                     setCookie('project', this.project);
                     setCookie('username', userType == 0 ? '' : this.username);
                     setCookie('level', userType.toString());
+                    setCookie('confetti', this.consensusConfetti ? "y" : "n");
                     this.$router.push('/project');
                 }
             },

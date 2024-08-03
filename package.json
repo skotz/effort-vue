@@ -11,6 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.3",
     "firebase": "^5.11.1",
     "vue": "^2.6.12",
     "vue-router": "^3.5.1",
