@@ -28,7 +28,7 @@
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
-            <div class="countdown" v-show="remainingTime > 0 && votesHidden">{{remainingTime}}</div>
+            <div class="countdown" v-show="remainingTime >= 0 && votesHidden">{{remainingTime}}</div>
             <div class="line-average" v-bind:style="{ top: (averageVoteHeight == 0 ? -100000 : averageVoteHeight) + 'px' }"></div>
             <div class="line-average-label" v-bind:style="{ top: (averageVoteHeight - 20) + 'px' }">{{ averageVote > 0 ? averageVote.toFixed(2) : "" }}</div>
             <div class="row effort-row effort-row-small">
@@ -241,7 +241,9 @@
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: resetVote,
-                    keepalive: getUtc()
+                    keepalive: getUtc(),
+                    timestamp: getUtc(),
+                    level: this.level,
                 });
             }
             var proj = this.project;
@@ -498,16 +500,18 @@
                     level: this.level,
                 });
             },
-            resetVotes: function () {
-                var users = this.allUsers;
-                for (var i = 0; i < users.length; i++) {
-                    database.ref('effort/' + this.project + "/" + users[i].userid).set({
-                        username: users[i].username,
-                        effort: resetVote,
-                        timestamp: getUtc(),
-                        keepalive: getUtc(),
-                        level: this.level,
-                    });
+            resetVotes: function () {              
+                for (var i in this.efforts) {
+                    // all users, whether within the keepalive or not
+                    if (this.efforts[i] != null && 
+                        this.efforts[i].username != null && 
+                        this.efforts[i].effort != nullVote && 
+                        this.efforts[i].username.length) {
+                        this.efforts[i].effort = resetVote;
+                        database.ref('effort/' + this.project + "/" + i).update({
+                            effort: resetVote,
+                        });
+                    }
                 }
                 database.ref('settings/' + this.project).set({
                     hidden: true,
