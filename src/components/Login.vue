@@ -5,38 +5,53 @@
                 <p v-for="error in errors" :key="error" class="error">{{error}}</p>
             </div>
         </div>
-        <div class="row">
-            <div class="col-4">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="project-label">Project</span>
+        <div class="row mt-4">
+            <div class="col-12 col-lg-6 mb-4">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <h3>Join a session</h3>
                     </div>
-                    <input v-model="project" placeholder="Project" class="form-control" aria-describedby="project-label" />
-                </div>
-            </div>
-            <div class="col-4">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="username-label">Username</span>
+                    <div class="col-12">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="project-label">Project</span>
+                            </div>
+                            <input v-model="project" placeholder="Project" class="form-control" aria-describedby="project-label" />
+                        </div>
                     </div>
-                    <input v-model="username" placeholder="Username" class="form-control" aria-describedby="username-label" />
+                    <div class="col-12">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="username-label">Name</span>
+                            </div>
+                            <input v-model="username" placeholder="Name" class="form-control" aria-describedby="username-label" />
+                            <img :src="getIdenticon(username)" :alt="name" class="identicon-inner" title="Your avatar (generated based on your name)">
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="input-group justify-content-start">
+                            <button type="button" class="btn btn-secondary btn-save" v-on:click="saveData(2)" title="You can vote, show votes, and clear votes.">Host</button>
+                            <button type="button" class="btn btn-secondary btn-save" v-on:click="saveData(0)" title="You can watch, but you can't vote, show votes, or clear votes.">Spectate</button>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="input-group justify-content-end">
+                            <button type="button" class="btn btn-success btn-save" v-on:click="saveData(1)" title="You can vote, but you can't show or clear votes.">Join</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-2">
-                <div class="input-group">
-                    <button type="button" class="btn btn-primary btn-save" v-on:click="saveData(false)">Go</button>
-                </div>
-            </div>
-            <div class="col-2">
-                <div class="input-group">
-                    <button type="button" class="btn btn-primary btn-save" v-on:click="saveData(true)">Spectate</button>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12 text-center">
-                <div class="identicon">
-                    <img :src="getIdenticon(username)" :alt="username">
+            <div class="col-12 col-lg-6">
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <h3>Learn the game</h3>
+                    </div>
+                    <div class="col-12">
+                        <p>Read the instructions at <a href="https://www.mountaingoatsoftware.com/agile/planning-poker" target="_blank">Mountain Goat Software</a>.</p>
+                        <p><strong>Join</strong> a project session to vote.</p>
+                        <p><strong>Host</strong> a project session to vote, show votes, and clear votes.</p>
+                        <p><strong>Spectate</strong> a project session to watch.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -78,21 +93,23 @@
             return {
                 project: getCookie('project'),
                 username: getCookie('username'),
+                level: getCookie('level'),
                 errors: []
             }
         },
         methods: {
-            saveData: function (spec) {
+            saveData: function (userType) {
                 this.errors = [];
-                if (!this.project && !spec) {
+                if (!this.project) {
                     this.errors.push("Project is required");
                 }
-                else if (!this.username && !spec) {
+                else if (!this.username && userType != 0) {
                     this.errors.push("Username is required");
                 }
                 else {
                     setCookie('project', this.project);
-                    setCookie('username', spec ? '' : this.username);
+                    setCookie('username', userType == 0 ? '' : this.username);
+                    setCookie('level', userType.toString());
                     this.$router.push('/project');
                 }
             },
@@ -115,15 +132,35 @@
 
 <style scoped>
     .btn-save {
-        width: 100%;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .justify-content-start .btn-save {
+        margin-right: 20px;
+    }
+    .justify-content-end .btn-save {
+        margin-left: 20px;
     }
     .error {
         color: #FF0000;
+    }
+    .input-group-text {
+        min-width: 110px;
     }
     .identicon {
         border: 1px solid #BBBBBB;
         width: 102px;
         height: 102px;
         margin: 30px auto;
+    }
+    .identicon-inner {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-left: none;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    .input-group-prepend {
+        margin-bottom: 20px;
     }
 </style>

@@ -2,12 +2,14 @@
     <div class="container">
         <div class="row">
             <div class="col-6">
-                <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project.</p>
+                <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project as {{ getUserLevel }}.</p>
+                <p v-if="!hasHost"><em class="text-danger">Waiting for host to join...</em></p>
             </div>
             <div class="col-6">
-                <button class="btn btn-primary float-right" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
-                <button class="btn btn-primary btn-leave float-right" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
+                <button class="btn btn-primary float-right" v-if="this.level == 2" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
+                <button class="btn btn-primary btn-leave float-right" v-if="this.level == 2" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
                 <button class="btn btn-leave float-right" v-on:click="leave">Leave</button>
+                <button class="btn btn-leave float-right btn-danger" v-if="!hasHost" v-on:click="host">Host</button>
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
@@ -76,7 +78,7 @@
     var resetVote = -1;
     var nullVote = -2;
     
-    var timeoutSeconds = 20;
+    var timeoutSeconds = 30;
     var keepaliveMilliseconds = 5000;
 
     function getUtc() {
@@ -150,6 +152,7 @@
             return {
                 project: getCookie('project'),
                 username: getCookie('username'),
+                level: getCookie('level'),
                 userid: userid,
                 settings: {},
                 efforts: {},
@@ -171,7 +174,7 @@
                 this.project = projectid;
                 setCookie('project', projectid);
             }
-            if (projectid == null || this.username == null) {
+            if (projectid == null || this.username == null || (this.level != '0' && this.level != '1' && this.level != '2')) {
                 this.$router.push('/');
             } else {
                 database.ref('effort/' + this.project + "/" + userid).set({
@@ -195,6 +198,7 @@
             this.ping = setInterval(function () {
                 keepalive();
             }, keepaliveMilliseconds);
+            keepalive();
 
             this.$nextTick(() => {
                 window.addEventListener('resize', () => {
@@ -204,6 +208,31 @@
             this.updateLabels();
         },
         computed: {
+            getUserLevel: function() {
+                if (this.level == '2') {
+                    return "the host";
+                }
+                if (this.level == '1') {
+                    return "a voter";
+                }
+                return "a spectator";
+            },
+            hasHost: function() {
+                if (this.level == '2') {
+                    return true;
+                }
+                for (var i in this.efforts) {
+                    if (this.efforts[i] != null &&
+                        this.efforts[i].username != null &&
+                        this.efforts[i].effort != nullVote &&
+                        this.efforts[i].username.length &&
+                        this.efforts[i].keepalive > getUtc() - timeoutSeconds &&
+                        this.efforts[i].level == '2') {
+                        return true;
+                    }
+                }
+                return false;
+            },
             allUsers: function () {
                 var all = [];
                 for (var i in this.efforts) {
@@ -219,7 +248,8 @@
                             voted: this.efforts[i].effort > 0,
                             last: false,
                             secondToLast: false,
-                            timestamp: this.efforts[i].timestamp
+                            timestamp: this.efforts[i].timestamp,
+                            level: this.efforts[i].level,
                         });
                     }
                 }
@@ -308,6 +338,10 @@
             }
         },
         methods: {
+            host: function() {
+                this.level = '2';
+                this.saveData();
+            },
             projectEfforts: function (effort) {
                 var all = [];
                 for (var i in this.efforts) {
@@ -330,13 +364,15 @@
             saveData: function () {
                 setCookie('project', this.project);
                 setCookie('username', this.username);
+                setCookie('level', this.level);
             },
             vote: function (effort) {
                 database.ref('effort/' + this.project + "/" + userid).set({
                     username: this.username,
                     effort: effort,
                     timestamp: getUtc(),
-                    keepalive: getUtc()
+                    keepalive: getUtc(),
+                    level: this.level,
                 });
             },
             resetVotes: function () {
@@ -346,7 +382,8 @@
                         username: users[i].username,
                         effort: resetVote,
                         timestamp: getUtc(),
-                        keepalive: getUtc()
+                        keepalive: getUtc(),
+                        level: this.level,
                     });
                 }
                 database.ref('settings/' + this.project).set({
@@ -358,7 +395,8 @@
                     username: this.username,
                     effort: nullVote,
                     timestamp: getUtc(),
-                    keepalive: getUtc()
+                    keepalive: getUtc(),
+                    level: this.level,
                 });
                 clearInterval(this.ping);
                 this.$router.push('/');
@@ -373,7 +411,8 @@
             },
             keepalive: function() {
                 database.ref('effort/' + this.project + "/" + userid).update({
-                    keepalive: getUtc()
+                    keepalive: getUtc(),
+                    level: this.level,
                 });
             },
             updateLabels: function() {
@@ -529,6 +568,7 @@
     }
     .effort-container {
         position: relative;
+        margin-top: 15px;
     }
     .line-average {
         /* width-of-axis-label * num-labels + padding - line-width */
