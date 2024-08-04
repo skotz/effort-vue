@@ -2,29 +2,28 @@
     <div class="container">
         <div class="row">
             <div class="col-6">
-                <p>Hello <b>{{ username }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project as {{ getUserLevel }}.</p>
+                <p>Hello <b>{{ parseName(username) }}</b>, you've joined the <a :href="getPath()" target="_blank"><b>{{ project }}</b></a> project as {{ getUserLevel }}.</p>
                 <p v-if="!hasHost"><em class="text-danger">Waiting for host to join...</em></p>
             </div>
             <div class="col-6 fix-right">
-                <button class="btn btn-primary ml-15 float-right" v-if="this.level == '2'" v-on:click="resetVotes" title="Reset Votes (Clear all votes and start a new session.)">Reset</button>
+                <button class="btn btn-primary ml-15 float-right" v-if="this.level == '2'" v-on:click="resetVotes" title="Reset votes (clear all votes and start a new session)">Reset</button>
                 <div class="btn-group ml-15 float-right">
-                    <button class="btn btn-primary" v-if="this.level == '2'" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show/Hide Votes (Votes will automatically be shown once everyone has voted.)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
+                    <button class="btn btn-primary" v-if="this.level == '2'" :disabled="this.noVoteUsers.length == 0" v-on:click="showVotes" title="Show or hide votes (note that votes will be automatically shown once everyone has voted)">{{ votesHidden ? 'Show' : 'Hide' }}</button>
                     <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" 
                             v-if="this.level == '2'" 
-                            :disabled="this.noVoteUsers.length == 0" 
-                            title="Start a countdown after which votes will be shown."
+                            :disabled="this.noVoteUsers.length == 0"
                             data-toggle="dropdown" 
                             aria-haspopup="true" 
                             aria-expanded="false">
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#" v-on:click="showVotes">Reveal now</a>
-                        <a class="dropdown-item" href="#" v-on:click="startShowTimer(10)">Reveal in 10 seconds</a>
+                        <a class="dropdown-item" href="#" v-on:click="showVotes" title="Show votes to all participants">Reveal now</a>
+                        <a class="dropdown-item" href="#" v-on:click="startShowTimer(10)" title="Start a countdown after which votes will be shown">Reveal in 10 seconds</a>
                     </div>
                 </div>
-                <button class="btn btn-secondary float-right ml-15" v-on:click="leave">Leave</button>
-                <button class="btn btn-danger float-right ml-15" v-if="!hasHost && this.level == '1'" v-on:click="host">Host</button>
+                <button class="btn btn-secondary float-right ml-15" v-on:click="leave" title="Leave the current session">Leave</button>
+                <button class="btn btn-danger float-right ml-15" v-if="!hasHost && this.level == '1'" v-on:click="host" title="Claim the host role for this session">Host</button>
             </div>
         </div>
         <div :class="['effort-container', votesHidden ? 'effort-hide' : '']">
@@ -41,8 +40,8 @@
                     <div class="effort-axis">
                         {{ i }}
                     </div>
-                    <div v-for="item in projectEfforts(i)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="item.username">
-                        <img :src="getIdenticon(item.username)" :alt="item.username" :title="item.username">
+                    <div v-for="item in projectEfforts(i)" :key="item.userid" :class="['effort-user', item.userid == userid ? 'effort-self' : 'effort-other']" :title="parseName(item.username)">
+                        <img :src="getIdenticon(item.username)" :alt="parseName(item.username)" :title="parseName(item.username)">
                     </div>
                     <div class="effort-user-insert">&nbsp;</div>
                 </div>
@@ -68,7 +67,7 @@
                     <div v-for="item in allUsers" 
                         :key="item.userid" 
                         :class="['effort-user', 'benched-user', item.voted ? 'user-voted' : 'user-not-voted']">
-                        <img :src="getIdenticon(item.username)" :alt="item.username" :title="item.username">
+                        <img :src="getIdenticon(item.username)" :alt="parseName(item.username)" :title="parseName(item.username)">
                     </div>
                 </div>
             </div>
@@ -79,6 +78,7 @@
 <script>
     import Firebase from 'firebase'
     import confetti from 'canvas-confetti'
+    import avatarMixin from "../mixins/avatar";
 
     // Initialize Firebase
     var config = {
@@ -201,6 +201,7 @@
     // Vue
     export default {
         name: 'Poker',
+        mixins: [avatarMixin],
         props: {
             value: Number
         },
@@ -500,7 +501,9 @@
                     level: this.level,
                 });
             },
-            resetVotes: function () {              
+            resetVotes: function () {     
+                this.remainingTime = -1;   
+                this.startedCountdown = false;      
                 for (var i in this.efforts) {
                     // all users, whether within the keepalive or not
                     if (this.efforts[i] != null && 
@@ -569,18 +572,8 @@
                 }
                 this.labels = newLabels;
             },
-            hash: function(value) {
-                // eslint-disable-next-line
-                return sha256("" + value);
-            },
-            getIdenticon: function(name) {
-                var hash = this.hash(name);
-                // eslint-disable-next-line
-                var data = new Identicon(hash, {
-                    background: [ 255, 255, 255, 128 ],
-                    size: 48
-                }).toString();
-                return 'data:image/png;base64,' + data;
+            getIdenticon: function (name) {
+                return 'data:image/png;base64,' + this.getAvatar(name, 48);
             }
         }
     }

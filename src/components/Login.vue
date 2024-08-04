@@ -25,7 +25,7 @@
                                 <span class="input-group-text" id="username-label">Name</span>
                             </div>
                             <input v-model="username" placeholder="Name" class="form-control" aria-describedby="username-label" />
-                            <img :src="getIdenticon(username)" :alt="name" class="identicon-inner" title="Your avatar (generated based on your name)">
+                            <img :src="getIdenticon(username)" alt="name" class="identicon-inner" title="Your avatar (generated based on your name)">
                         </div>
                     </div>
                     <div class="col-12 mb-3">
@@ -66,6 +66,8 @@
 </template>
 
 <script>
+    import avatarMixin from "../mixins/avatar";
+
     // Get saved settings
     var userid = getCookie('userid');
     if (userid == null) {
@@ -96,6 +98,7 @@
     // Vue
     export default {
         name: 'Login',
+        mixins: [avatarMixin],
         data: function () {
             return {
                 project: getCookie('project'),
@@ -122,18 +125,8 @@
                     this.$router.push('/project');
                 }
             },
-            hash: function(value) {
-                // eslint-disable-next-line
-                return sha256("" + value);
-            },
             getIdenticon: function(name) {
-                var hash = this.hash(name);
-                // eslint-disable-next-line
-                var data = new Identicon(hash, {
-                    background: [ 255, 255, 255, 128 ],
-                    size: 100
-                }).toString();
-                return 'data:image/png;base64,' + data;
+                return 'data:image/png;base64,' + this.getAvatar(name, 36);
             }
         }
     }
